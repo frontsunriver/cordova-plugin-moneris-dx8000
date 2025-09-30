@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moneris DX8000 Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+        .status.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+        .status.success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #666;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #666;
+            font-weight: bold;
+        }
+        .info {
+            background: #fff9c4;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #fbc02d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Moneris DX8000 Test</h1>
+        
+        <div class="info">
+            ℹ️ Update the credentials in the code before testing
+        </div>
+
+        <div id="status" class="status">
+            Waiting for device ready...
+        </div>
+
+        <!-- Configuration Section -->
+        <div class="section">
+            <h3>📋 Configuration</h3>
+            <label>Device IP Address:</label>
+            <input type="text" id="deviceIp" placeholder="192.168.1.100" value="192.168.1.100">
+            
+            <label>Port:</label>
+            <input type="number" id="port" placeholder="8080" value="8080">
+            
+            <label>Connection Type:</label>
+            <select id="connectionType">
+                <option value="network">Network (TCP/IP)</option>
+                <option value="bluetooth">Bluetooth</option>
+                <option value="usb">USB</option>
+            </select>
+            
+            <button onclick="initializePlugin()">Initialize Plugin</button>
+        </div>
+
+        <!-- Connection Section -->
+        <div class="section">
+            <h3>🔌 Connection</h3>
+            <button onclick="connectDevice()">Connect Device</button>
+            <button onclick="checkStatus()">Check Status</button>
+            <button onclick="disconnectDevice()">Disconnect</button>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="section">
+            <h3>💳 Payment</h3>
+            <label>Amount (CAD):</label>
+            <input type="number" id="amount" placeholder="0.00" step="0.01" value="10.00">
+            
+            <label>Order ID (optional):</label>
+            <input type="text" id="orderId" placeholder="Auto-generated if empty">
+            
+            <button onclick="processPayment()">Process Payment</button>
+        </div>
+
+        <!-- Transaction Actions -->
+        <div class="section">
+            <h3>🔄 Transaction Actions</h3>
+            <label>Transaction ID:</label>
+            <input type="text" id="transactionId" placeholder="Enter transaction ID">
+            
+            <button onclick="processRefund()">Process Refund</button>
+            <button onclick="voidTransaction()">Void Transaction</button>
+            <button onclick="printReceipt()">Print Receipt</button>
+            <button onclick="getLastTransaction()">Get Last Transaction</button>
+        </div>
+
+        <!-- Other Actions -->
+        <div class="section">
+            <h3>⚙️ Other Actions</h3>
+            <button onclick="cancelTransaction()">Cancel Transaction</button>
+        </div>
+
+        <!-- Transaction Log -->
+        <div class="section">
+            <h3>📝 Transaction Log</h3>
+            <div id="transactionLog" style="max-height: 200px; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                <em>No transactions yet...</em>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript">
+        let lastTransactionId = null;
+
+        // Wait for device ready
+        document.addEventListener('deviceready', onDeviceReady, false);
+
+        function onDeviceReady() {
+            console.log('Device is ready');
+            updateStatus('Device ready! Configure and initialize the plugin.', 'success');
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+            console.log(type.toUpperCase() + ':', message);
+        }
+
+        function logTransaction(action, data) {
+            const logDiv = document.getElementById('transactionLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.style.marginBottom = '10px';
+            entry.style.padding = '5px';
+            entry.style.borderBottom = '1px solid #ddd';
+            entry.innerHTML = `<strong>${timestamp}</strong> - ${action}<br><pre style="margin:5px 0;">${JSON.stringify(data, null, 2)}</pre>`;
+            
+            if (logDiv.firstChild.tagName === 'EM') {
+                logDiv.innerHTML = '';
+            }
+            logDiv.insertBefore(entry, logDiv.firstChild);
+        }
+
+        function initializePlugin() {
+            const deviceIp = document.getElementById('deviceIp').value;
+            const port = document.getElementById('port').value;
+            const connectionType = document.getElementById('connectionType').value;
+
+            if (!deviceIp || !port) {
+                updateStatus('Please enter Device IP and Port', 'error');
+                return;
+            }
+
+            updateStatus('Initializing plugin...', 'info');
+
+            const config = {
+                device_ip: deviceIp,
+                port: parseInt(port),
+                connection_type: connectionType
+            };
+
+            MonerisDX8000.initialize(
+                config,
+                function(result) {
+                    updateStatus('Plugin initialized successfully!', 'success');
+                    logTransaction('Initialize', result);
+                },
+                function(error) {
+                    updateStatus('Initialization failed: ' + error, 'error');
+                    logTransaction('Initialize Error', { error: error });
+                }
+            );
+        }
+
+        function connectDevice() {
+            updateStatus('Connecting to device...', 'info');
+            
+            MonerisDX8000.connect(
+                function(result) {
+                    updateStatus('Device connected successfully!', 'success');
+                    logTransaction('Connect', result);
+                },
+                function(error) {
+                    updateStatus('Connection failed: ' + error, 'error');
+                    logTransaction('Connect Error', { error: error });
+                }
+            );
+        }
+
+        function disconnectDevice() {
+            updateStatus('Disconnecting from device...', 'info');
+            
+            MonerisDX8000.disconnect(
+                function(result) {
+                    updateStatus('Device disconnected', 'info');
+                    logTransaction('Disconnect', result);
+                },
+                function(error) {
+                    updateStatus('Disconnect failed: ' + error, 'error');
+                    logTransaction('Disconnect Error', { error: error });
+                }
+            );
+        }
+
+        function checkStatus() {
+            updateStatus('Checking device status...', 'info');
+            
+            MonerisDX8000.getDeviceStatus(
+                function(status) {
+                    const msg = `Status - Connected: ${status.connected}, Initialized: ${status.initialized}`;
+                    updateStatus(msg, status.connected ? 'success' : 'info');
+                    logTransaction('Device Status', status);
+                },
+                function(error) {
+                    updateStatus('Status check failed: ' + error, 'error');
+                    logTransaction('Status Error', { error: error });
+                }
+            );
+        }
+
+        function processPayment() {
+            const amount = document.getElementById('amount').value;
+            const orderId = document.getElementById('orderId').value;
+
+            if (!amount || parseFloat(amount) <= 0) {
+                updateStatus('Please enter a valid amount', 'error');
+                return;
+            }
+
+            updateStatus('Processing payment...', 'info');
+
+            const paymentData = {
+                amount: amount,
+                currency: 'CAD'
+            };
+
+            if (orderId) {
+                paymentData.order_id = orderId;
+            }
+
+            MonerisDX8000.processPayment(
+                paymentData,
+                function(result) {
+                    updateStatus('Payment successful! Transaction ID: ' + result.transaction_id, 'success');
+                    lastTransactionId = result.transaction_id;
+                    document.getElementById('transactionId').value = result.transaction_id;
+                    logTransaction('Payment Success', result);
+                },
+                function(error) {
+                    updateStatus('Payment failed: ' + error, 'error');
+                    logTransaction('Payment Error', { error: error });
+                }
+            );
+        }
+
+        function processRefund() {
+            const amount = document.getElementById('amount').value;
+            const transactionId = document.getElementById('transactionId').value;
+
+            if (!amount || !transactionId) {
+                updateStatus('Please enter amount and transaction ID', 'error');
+                return;
+            }
+
+            updateStatus('Processing refund...', 'info');
+
+            const refundData = {
+                amount: amount,
+                transaction_id: transactionId
+            };
+
+            MonerisDX8000.processRefund(
+                refundData,
+                function(result) {
+                    updateStatus('Refund successful!', 'success');
+                    logTransaction('Refund Success', result);
+                },
+                function(error) {
+                    updateStatus('Refund failed: ' + error, 'error');
+                    logTransaction('Refund Error', { error: error });
+                }
+            );
+        }
+
+        function voidTransaction() {
+            const transactionId = document.getElementById('transactionId').value;
+
+            if (!transactionId) {
+                updateStatus('Please enter transaction ID', 'error');
+                return;
+            }
+
+            updateStatus('Voiding transaction...', 'info');
+
+            const voidData = {
+                transaction_id: transactionId
+            };
+
+            MonerisDX8000.voidTransaction(
+                voidData,
+                function(result) {
+                    updateStatus('Transaction voided successfully!', 'success');
+                    logTransaction('Void Success', result);
+                },
+                function(error) {
+                    updateStatus('Void failed: ' + error, 'error');
+                    logTransaction('Void Error', { error: error });
+                }
+            );
+        }
+
+        function printReceipt() {
+            const transactionId = document.getElementById('transactionId').value;
+
+            if (!transactionId) {
+                updateStatus('Please enter transaction ID', 'error');
+                return;
+            }
+
+            updateStatus('Printing receipt...', 'info');
+
+            const receiptData = {
+                transaction_id: transactionId
+            };
+
+            MonerisDX8000.printReceipt(
+                receiptData,
+                function(result) {
+                    updateStatus('Receipt printed successfully!', 'success');
+                    logTransaction('Print Receipt', result);
+                },
+                function(error) {
+                    updateStatus('Print failed: ' + error, 'error');
+                    logTransaction('Print Error', { error: error });
+                }
+            );
+        }
+
+        function getLastTransaction() {
+            updateStatus('Getting last transaction...', 'info');
+
+            MonerisDX8000.getLastTransaction(
+                function(result) {
+                    if (result.transaction_id) {
+                        updateStatus('Last transaction retrieved', 'success');
+                        document.getElementById('transactionId').value = result.transaction_id;
+                    } else {
+                        updateStatus('No previous transaction found', 'info');
+                    }
+                    logTransaction('Get Last Transaction', result);
+                },
+                function(error) {
+                    updateStatus('Failed to get last transaction: ' + error, 'error');
+                    logTransaction('Get Last Transaction Error', { error: error });
+                }
+            );
+        }
+
+        function cancelTransaction() {
+            updateStatus('Cancelling transaction...', 'info');
+
+            MonerisDX8000.cancelTransaction(
+                function(result) {
+                    updateStatus('Transaction cancelled', 'info');
+                    logTransaction('Cancel Transaction', result);
+                },
+                function(error) {
+                    updateStatus('Cancel failed: ' + error, 'error');
+                    logTransaction('Cancel Error', { error: error });
+                }
+            );
+        }
+    </script>
+</body>
+</html>

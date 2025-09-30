@@ -1,0 +1,18 @@
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    // Add Moneris SDK dependency here when you obtain it
+    // Example: implementation files('libs/moneris-sdk.jar')
+    // Or from Maven if available:
+    // implementation 'com.moneris:android-sdk:x.x.x'
+}
+
+android {
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+    }
+}

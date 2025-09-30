@@ -1,0 +1,29 @@
+node_modules/
+.DS_Store
+*.log
+.vscode/
+.idea/
+*.iml
+build/
+dist/
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+.gradle/
+local.properties
+
+# Android SDK files
+src/android/libs/*.jar
+src/android/libs/*.aar
+
+# Sensitive files
+config.xml
+credentials.json
+
+# Platform specific
+platforms/
+plugins/

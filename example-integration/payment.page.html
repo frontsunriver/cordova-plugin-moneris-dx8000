@@ -1,0 +1,78 @@
+<!-- Example: src/app/pages/payment/payment.page.html -->
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Payment</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <!-- Device Status Card -->
+  <ion-card *ngIf="deviceStatus">
+    <ion-card-header>
+      <ion-card-title>Device Status</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label>
+          <h2>{{ deviceStatus.device_name }}</h2>
+          <p>Status: 
+            <ion-badge [color]="deviceStatus.connected ? 'success' : 'danger'">
+              {{ deviceStatus.connected ? 'Connected' : 'Disconnected' }}
+            </ion-badge>
+          </p>
+        </ion-label>
+      </ion-item>
+      <ion-button expand="block" fill="outline" (click)="checkStatus()">
+        Refresh Status
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Payment Form -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Process Payment</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      
+      <ion-item>
+        <ion-label position="floating">Amount (CAD)</ion-label>
+        <ion-input 
+          type="number" 
+          [(ngModel)]="amount" 
+          placeholder="0.00"
+          step="0.01">
+        </ion-input>
+      </ion-item>
+
+      <ion-button 
+        expand="block" 
+        (click)="processPayment()"
+        [disabled]="!amount || !deviceStatus?.connected"
+        class="ion-margin-top">
+        <ion-icon name="card-outline" slot="start"></ion-icon>
+        Process Payment
+      </ion-button>
+
+      <ion-text color="medium" class="ion-text-center">
+        <p><small>Customer will follow prompts on payment device</small></p>
+      </ion-text>
+
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Retry Connection Button (if not connected) -->
+  <ion-button 
+    *ngIf="deviceStatus && !deviceStatus.connected"
+    expand="block" 
+    color="warning"
+    (click)="initializeDevice()">
+    <ion-icon name="refresh-outline" slot="start"></ion-icon>
+    Reconnect Device
+  </ion-button>
+
+</ion-content>

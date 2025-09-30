@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-moneris-dx8000" 
+        version="1.0.0" 
+        xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <name>MonerisDX8000</name>
+    <description>Cordova Plugin for Moneris DX8000 Payment Terminal</description>
+    <license>MIT</license>
+    <keywords>cordova,moneris,dx8000,payment,terminal,android</keywords>
+    <repo>https://github.com/yourusername/cordova-plugin-moneris-dx8000</repo>
+    <issue>https://github.com/yourusername/cordova-plugin-moneris-dx8000/issues</issue>
+
+    <!-- JavaScript Interface -->
+    <js-module src="www/MonerisDX8000.js" name="MonerisDX8000">
+        <clobbers target="MonerisDX8000" />
+    </js-module>
+
+    <!-- Android Platform -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="MonerisDX8000">
+                <param name="android-package" value="com.plugin.moneris.MonerisDX8000" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.BLUETOOTH" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+            <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+            <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>
+
+        <!-- Java Source Files -->
+        <source-file src="src/android/MonerisDX8000.java" target-dir="src/com/plugin/moneris" />
+        <source-file src="src/android/PaymentRequest.java" target-dir="src/com/plugin/moneris" />
+        <source-file src="src/android/PaymentResponse.java" target-dir="src/com/plugin/moneris" />
+
+        <!-- Framework Dependencies -->
+        <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
+    </platform>
+
+</plugin>
