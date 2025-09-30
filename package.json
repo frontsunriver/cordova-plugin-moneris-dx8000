@@ -18,14 +18,14 @@
     "ecosystem:cordova",
     "cordova-android"
   ],
-  "author": "Your Name",
+  "author": "sunriver",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/cordova-plugin-moneris-dx8000.git"
+    "url": "https://github.com/frontsunriver/cordova-plugin-moneris-dx8000.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/cordova-plugin-moneris-dx8000/issues"
+    "url": "https://github.com/frontsunriver/cordova-plugin-moneris-dx8000/issues"
   },
-  "homepage": "https://github.com/yourusername/cordova-plugin-moneris-dx8000#readme"
+  "homepage": "https://github.com/frontsunriver/cordova-plugin-moneris-dx8000#readme"
 }
