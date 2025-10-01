@@ -16,10 +16,6 @@ out/
 .gradle/
 local.properties
 
-# Android SDK files
-src/android/libs/*.jar
-src/android/libs/*.aar
-
 # Sensitive files
 config.xml
 credentials.json
