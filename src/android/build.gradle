@@ -8,6 +8,7 @@ dependencies {
     // Example: implementation files('libs/moneris-sdk.jar')
     // Or from Maven if available:
     // implementation 'com.moneris:android-sdk:x.x.x'
+    implementation files('libs/JavaAPI.jar')
 }
 
 android {
